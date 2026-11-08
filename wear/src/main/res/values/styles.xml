@@ -33,6 +33,14 @@
         <item name="android:layout_marginTop">8dp</item>
     </style>
 
+    <style name="SliderLabel">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/text</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+
     <style name="Chip">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

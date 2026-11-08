@@ -22,7 +22,8 @@ public final class Tuning {
     public static final double SHIP_HITBOX = 0.8, ENEMY_HITBOX = 0.85;
     /** Unverwundbarkeit nach einer Kollision; gilt nicht für Gegner, die unten hinausfliegen. */
     public static final double INVULNERABLE_S = 1.0;
-    public static final int LIVES = 3;
+    /** Leben zu Beginn: Standard und einstellbarer Bereich (Schieberegler im Menü). */
+    public static final int LIVES = 3, LIVES_MIN = 1, LIVES_MAX = 5;
 
     /* Dauerfeuer */
     public static final double FIRE_RATE = 7, BULLET_SPEED = 1400, BULLET_W = 8, BULLET_H = 24;

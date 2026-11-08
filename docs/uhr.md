@@ -10,7 +10,7 @@ braucht kein Netz und speichert nur Rekord und Einstellungen auf der Uhr.
 | Technik | Java, nur Android-Framework (keine AndroidX-Bibliotheken) |
 | Paketname | `de.kronenshooter`, Code in `de.kronenshooter.wear` |
 | Berechtigungen | nur `VIBRATE` (normale Berechtigung, ohne Nachfrage) |
-| Version | 1.1 (versionCode 2) |
+| Version | 1.2 (versionCode 3) |
 
 ## Bedienung
 
@@ -18,7 +18,7 @@ Jede Seite ist eine eigene Activity. **Wischen nach rechts** geht eine Seite zur
 
 | Seite | Inhalt | Bedienung |
 |---|---|---|
-| Menü (Start) | Name, Rekord für die eingestellte Gegnermenge, „Start“, Gegner (wenig / mittel / viel / sehr viel), Krone (langsam / mittel / schnell), Richtung (normal / umgekehrt), Vibration (an / aus), Bildrate (30 / 60), „Krone messen“, Kurzhilfe | Antippen startet bzw. schaltet um, wird sofort gespeichert. Krone scrollt. Wirkt ab dem nächsten Spiel |
+| Menü (Start) | Name, Rekord für die eingestellte Gegnermenge und Lebenszahl, „Start“, Gegner (wenig / mittel / viel / sehr viel), Schieberegler „Leben“ (1–5), Krone (langsam / mittel / schnell), Richtung (normal / umgekehrt), Vibration (an / aus), Bildrate (30 / 60), „Krone messen“, Kurzhilfe | Antippen startet bzw. schaltet um; Regler ziehen oder auf eine Stufe tippen. Wird sofort gespeichert. Krone scrollt. Wirkt ab dem nächsten Spiel |
 | Spiel | Punkte oben, Schiff unten, darunter die Leben | **Krone:** Schiff links/rechts. **Wischen nach rechts:** zurück ins Menü, die Partie endet, der Rekord bleibt. Tippen wirkt nicht (die Hand an der Krone streift leicht den Rand) |
 | Pause | Feld „Pause“ über dem eingefrorenen Spiel | Tippen: weiter. Wischen: Menü |
 | Ende | „Vorbei“, Punkte, „Neuer Rekord!“ oder „Rekord …“ | Tippen (frühestens nach 0,8 s): neue Partie. Wischen: Menü |
@@ -33,8 +33,10 @@ Jede Seite ist eine eigene Activity. **Wischen nach rechts** geht eine Seite zur
 - **Vibration:** kurz und kräftig bei jedem verlorenen Leben, doppelt am Ende.
 - Eine laufende Partie wird nicht gespeichert. Wischt man zurück oder beendet das System die App im Hintergrund,
   ist sie verloren, der Rekord nicht (er wird in `onPause` gesichert).
-- **Rekord je Gegnermenge:** Das Menü zeigt den Rekord der eingestellten Stufe. Der Rekord aus Version 1.0 gilt
-  als Rekord für „mittel“.
+- **Rekord je Gegnermenge und Leben:** Das Menü zeigt den Rekord der eingestellten Kombination. Ältere Rekorde
+  (1.0, 1.1) gelten als Rekorde mit 3 Leben.
+- **Schieberegler und Zurück:** Ein Zug nach rechts auf dem Regler verstellt nur den Regler und schließt das Menü
+  nicht (`StepSlider` meldet waagerechte Scrollbarkeit). Überall sonst auf der Seite ist Wischen nach rechts Zurück.
 
 ## Energie
 
@@ -197,11 +199,12 @@ der Painter-Umweg erlaubt Zeichentests (`RecordingPainter`) und Vorschaubilder (
 |---|---|
 | `WearActivity` | Grundlage: Innenabstände für runde Bildschirme, Krone (`dispatchGenericMotionEvent`, Quelle `ROTARY_ENCODER`) |
 | `MainActivity` | Menü und Einstellungen |
+| `StepSlider` | Schieberegler (SeekBar), der beim Ziehen nach rechts kein Zurück auslöst |
 | `GameActivity` | Lebenszyklus, Krone an das Spiel, Bildschirm wach halten, Bildrate anfordern, Vibration, Rekord |
 | `GameView` | Takt über den Choreographer (nur beim Spielen, Vsyncs zwischen den Bildern ausgelassen), Tippen in Pause und am Ende |
 | `CanvasPainter` | `Painter` auf `Canvas`, Sprites als Bitmaps ohne Filter |
 | `CrownTestActivity` | Messseite für die Krone |
-| `Store` | Rekorde je Gegnermenge und Einstellungen (SharedPreferences `kronen_shooter`), Übernahme des Rekords aus 1.0 |
+| `Store` | Rekorde je Gegnermenge und Leben, Einstellungen (SharedPreferences `kronen_shooter`), Übernahme älterer Rekorde |
 
 **Ein Bild im Spiel:** Der Choreographer meldet den Vsync. Ist seit dem letzten Bild weniger als 1/Bildrate
 (minus 4 ms Toleranz) vergangen, wartet `GameView` auf den nächsten Vsync. Sonst bestimmt `FrameClock` die Zahl der
@@ -214,8 +217,8 @@ versehentliches Wischen); seit 1.1 meldet `GameView` keine Scrollbarkeit mehr, Z
 
 ## Stand und Grenzen
 
-- **Version 1.1 ist noch nicht auf einer Uhr getestet** (1.0 lief auf der Pixel Watch 5). Geprüft wurde:
-  - 65 Unit-Tests der Spiellogik inklusive Balancing-Bericht;
+- **Version 1.2 ist noch nicht auf einer Uhr getestet** (1.0 lief auf der Pixel Watch 5). Geprüft wurde:
+  - 68 Unit-Tests der Spiellogik inklusive Balancing-Bericht;
   - die Uhr-App kompiliert mit `javac -Xlint:all -Werror` gegen API 35;
   - gegen API 30 ist der einzige neuere Aufruf `View.setRequestedFrameRate`, hinter einer Versionsabfrage;
   - die APK ist mit aapt2, dx, zipalign und apksigner gebaut;
@@ -224,6 +227,7 @@ versehentliches Wischen); seit 1.1 meldet `GameView` keine Scrollbarkeit mehr, Z
 - Nicht geprüft: Gradle-Sync (Googles Maven-Repository war nicht erreichbar; die Gradle-Dateien entsprechen
   substanz-tracker ohne Tiles), Verhalten auf dem Gerät.
 - Zu messen bzw. einzustellen an der Uhr: Empfindlichkeit der Krone ([oben](#krone-einstellen)), Bildrate und Akku
-  ([Energie](#energie)), ob Zurück-Wischen mitten im Spiel zuverlässig ins Menü führt.
+  ([Energie](#energie)), ob Zurück-Wischen mitten im Spiel zuverlässig ins Menü führt, ob sich der Schieberegler
+  auf dem kleinen Display gut treffen lässt.
 - Keine Kachel und keine Komplikation (Rekord auf dem Zifferblatt). Beides bräuchte AndroidX-Bibliotheken.
 - Kein Ton (nicht gefordert, und auf der Uhr meist unpassend).

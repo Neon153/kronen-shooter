@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-08 – 1.2
+
+- **Leben einstellbar** von 1 bis 5 per Schieberegler im Menü (Standard 3). Der Regler löst beim Ziehen nach rechts
+  kein Zurück aus (`StepSlider`).
+- Rekord je Kombination aus Gegnermenge und Leben; ältere Rekorde gelten als Rekorde mit 3 Leben.
+- Anzeige bis 5 Leben mittig unter dem Schiff, ganz im Kreis.
+- `BalanceReport` misst zusätzlich alle Lebenszahlen: 1 → 5 Leben verlängert die Partie des menschenähnlichen
+  Bots von 166 auf 199 s im Median. 68 Tests.
+
 ## 2026-11-08 – 1.1
 
 - **Gegnermenge** im Menü: wenig, mittel, viel, sehr viel (Faktor 0,6 / 1,0 / 1,5 / 2,2 auf die Rate der Wellen

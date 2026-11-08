@@ -41,6 +41,24 @@ public class RendererTest {
     }
 
     @Test
+    public void fiveLivesInsideCircleAndCentered() {
+        Game g = new Game(new Arena(true), 7, Tuning.SPAWN_DEFAULT, Tuning.LIVES_MAX);
+        RecordingPainter p = new RecordingPainter();
+        new GameRenderer().draw(g, p);
+        double min = Double.POSITIVE_INFINITY, max = Double.NEGATIVE_INFINITY;
+        int n = 0;
+        for (RecordingPainter.Op o : p.ops) {
+            if (!"sprite".equals(o.kind) || o.id != Sprites.LIFE) continue;
+            n++;
+            assertTrue("Leben im Kreis", RecordingPainter.insideCircle(o));
+            min = Math.min(min, o.x0);
+            max = Math.max(max, o.x1);
+        }
+        assertEquals(5, n);
+        assertEquals("mittig", 500, (min + max) / 2, 1e-9);
+    }
+
+    @Test
     public void shipAtLaneEdgesInsideCircle() {
         for (double dx : new double[] {-1e6, 1e6}) {
             Game g = RulesTest.quiet();
