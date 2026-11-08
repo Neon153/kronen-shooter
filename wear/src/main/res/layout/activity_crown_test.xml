@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Messseite für die Krone: Summe der Drehung in dp. Antippen setzt zurück, Wischen schließt. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/Title"
+        android:text="@string/crown_test" />
+
+    <TextView
+        style="@style/Small"
+        android:layout_marginTop="4dp"
+        android:text="@string/crown_test_help" />
+
+    <TextView
+        android:id="@+id/total"
+        style="@style/Big" />
+
+    <TextView
+        android:id="@+id/detail"
+        style="@style/Muted" />
+
+    <TextView
+        android:id="@+id/lane"
+        style="@style/Muted" />
+</LinearLayout>

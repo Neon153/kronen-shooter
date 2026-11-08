@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Kronen-Shooter</string>
+
+    <!-- Menü -->
+    <string name="start">Start</string>
+    <string name="best">Rekord %1$d</string>
+    <string name="best_none">Noch kein Rekord</string>
+    <string name="sensitivity">Krone: %1$s</string>
+    <string name="sensitivity_0">langsam</string>
+    <string name="sensitivity_1">mittel</string>
+    <string name="sensitivity_2">schnell</string>
+    <string name="direction">Richtung: %1$s</string>
+    <string name="direction_normal">normal</string>
+    <string name="direction_inverted">umgekehrt</string>
+    <string name="vibration">Vibration: %1$s</string>
+    <string name="on">an</string>
+    <string name="off">aus</string>
+    <string name="fps">Bildrate: %1$d/s</string>
+    <string name="crown_test">Krone messen</string>
+    <string name="hint">Krone drehen steuert das Schiff, geschossen wird von selbst. Kein Gegner darf vorbei.</string>
+
+    <!-- Krone messen -->
+    <string name="crown_test_help">Krone genau eine Umdrehung im Uhrzeigersinn drehen. Tippen setzt zurück.</string>
+    <string name="crown_total">%1$s dp</string>
+    <string name="crown_events">%1$d Ereignisse · zuletzt %2$s dp</string>
+    <string name="crown_lane">Ganze Bahn bei „%1$s“: %2$s Umdrehungen</string>
+</resources>

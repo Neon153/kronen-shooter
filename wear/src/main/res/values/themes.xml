@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:colorPrimary">@color/accent</item>
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/muted</item>
+        <!-- Wischen nach rechts schließt die Ansicht (Standard auf Wear OS). Im Spiel nur in Pause und am Ende,
+             siehe GameView.canScrollHorizontally -->
+        <item name="android:windowSwipeToDismiss">true</item>
+    </style>
+</resources>

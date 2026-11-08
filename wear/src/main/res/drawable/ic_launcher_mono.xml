@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Erzeugt aus dem Schiff-Sprite (de.kronenshooter.core.Sprites, 11 × 10 Raster, 4 Einheiten je Pixel) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M52,38h4v4h-4zM48,42h4v4h-4zM56,42h4v4h-4zM44,46h8v4h-8zM56,46h8v4h-8zM44,50h20v4h-20zM44,54h20v4h-20zM40,58h28v4h-28zM40,62h12v4h-12zM56,62h12v4h-12zM44,66h8v4h-8zM56,66h8v4h-8z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M36,54h4v4h-4zM68,54h4v4h-4zM36,58h4v4h-4zM68,58h4v4h-4zM32,62h8v4h-8zM52,62h4v4h-4zM68,62h8v4h-8zM32,66h8v4h-8zM68,66h8v4h-8z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M52,42h4v4h-4zM52,46h4v4h-4z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M52,34h4v4h-4zM48,38h4v4h-4zM56,38h4v4h-4z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M48,70h4v4h-4zM56,70h4v4h-4z" />
+</vector>

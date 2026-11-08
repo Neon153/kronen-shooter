@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Menü: Rekord, Start, Einstellungen. Die Krone scrollt die Liste (WearActivity.onRotary). -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            style="@style/Title"
+            android:text="@string/app_name" />
+
+        <TextView
+            android:id="@+id/best"
+            style="@style/Muted" />
+
+        <TextView
+            android:id="@+id/start"
+            style="@style/ChipPrimary"
+            android:text="@string/start" />
+
+        <TextView
+            android:id="@+id/sensitivity"
+            style="@style/Chip" />
+
+        <TextView
+            android:id="@+id/direction"
+            style="@style/Chip" />
+
+        <TextView
+            android:id="@+id/vibration"
+            style="@style/Chip" />
+
+        <TextView
+            android:id="@+id/fps"
+            style="@style/Chip" />
+
+        <TextView
+            android:id="@+id/crownTest"
+            style="@style/Chip"
+            android:text="@string/crown_test" />
+
+        <TextView
+            style="@style/Small"
+            android:text="@string/hint" />
+    </LinearLayout>
+</ScrollView>

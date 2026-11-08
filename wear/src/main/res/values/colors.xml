@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Immer dunkel, Hintergrund schwarz (OLED); Werte wie de.kronenshooter.core.Palette -->
+    <color name="bg">#000000</color>
+    <color name="card">#1C1F26</color>
+    <color name="text">#ECEEF3</color>
+    <color name="muted">#9BA1AD</color>
+    <color name="accent">#6F9CFF</color>
+    <color name="on_accent">#0B1530</color>
+    <color name="ripple">#33FFFFFF</color>
+    <color name="ic_launcher_bg">#0B1220</color>
+</resources>
