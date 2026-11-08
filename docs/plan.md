@@ -60,6 +60,14 @@ Debugging per WLAN aus Android Studio.
 | Gegner sollen über die Zeit im Flug schneller werden | Verstanden als: jeder Gegner beschleunigt auf dem Weg nach unten (oben Grundtempo, am Schiff ×1,48, unten ×1,6). Die Grundtempi sind um 18 % gesenkt, damit die Zeit bis zum Schiff gleich bleibt. Dass alle Gegner mit der Spielzeit schneller werden, gab es schon seit 1.0 (×1,0 → ×1,6 in 5 min, danach +0,1 je Minute) und bleibt |
 | Wischen vom linken Rand nach rechts ist Zurück und muss auch im Spiel funktionieren | Sperre aus 1.0 entfernt. Zurück im Spiel beendet die Partie, der Rekord wird in `onPause` gesichert |
 
+## Version 1.2: Leben einstellbar
+
+| Wunsch | Umsetzung |
+|---|---|
+| Anzahl Leben 1 bis 5, am besten mit Schieberegler | `SeekBar` mit 5 Stufen und Strichen im Menü (Standard 3). Ein normaler SeekBar hätte beim Ziehen nach rechts das Zurück-Wischen ausgelöst und die App geschlossen; `StepSlider` meldet deshalb waagerechte Scrollbarkeit |
+| (nicht gefordert) | Rekord je Kombination aus Gegnermenge und Leben, ältere Rekorde gelten als „3 Leben“. Mit 5 Leben dauern Partien länger, ein gemeinsamer Rekord wäre nicht vergleichbar |
+| Erkenntnis | Die Lebenszahl verlängert Partien des Bots nur um rund 20 % (1 → 5 Leben), weil die Schwierigkeitswand am Ende alle Leben schnell nimmt. Bei Menschen mit frühen Fehlern wirkt sie stärker; sonst müsste die Wand flacher werden |
+
 ## Offen (an der Uhr)
 
 1. Krone messen und `CrownInput.GAIN` setzen ([uhr.md](uhr.md#krone-einstellen)).

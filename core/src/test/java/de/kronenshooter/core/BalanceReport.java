@@ -53,10 +53,14 @@ public class BalanceReport {
     }
 
     static Stats play(Bot proto, int spawnLevel) {
+        return play(proto, spawnLevel, Tuning.LIVES);
+    }
+
+    static Stats play(Bot proto, int spawnLevel, int lives) {
         Stats s = new Stats();
         for (int i = 0; i < GAMES; i++) {
             Bot bot = proto == null ? null : proto.fresh();
-            Game g = new Game(new Arena(true), 1000 + i, spawnLevel);
+            Game g = new Game(new Arena(true), 1000 + i, spawnLevel, lives);
             while (g.state() == Game.State.PLAYING && g.time() < CAP_S) {
                 if (bot != null) bot.control(g);
                 g.step();
@@ -121,6 +125,20 @@ public class BalanceReport {
             assertTrue("Partie endet nicht", s.max(s.duration) < CAP_S);
             assertTrue("mehr Gegner, kürzere Partien", s.median(s.duration) < previous);
             assertTrue("unfairer Anfang bei " + names[level], s.min(s.duration) > 30);
+            previous = s.median(s.duration);
+        }
+    }
+
+    /** Leben: Partien des menschenähnlichen Bots je Lebenszahl (Gegnermenge mittel). Mehr Leben = längere Partien. */
+    @Test
+    public void livesSetting() {
+        double previous = 0;
+        System.out.println("Leben (wie Mensch, Gegnermenge mittel, " + GAMES + " Partien je Wert):");
+        for (int lives = Tuning.LIVES_MIN; lives <= Tuning.LIVES_MAX; lives++) {
+            Stats s = play(new Bot(BOT_SPEED / 2, HUMAN_REACTION_S), Tuning.SPAWN_DEFAULT, lives);
+            print(lives + " Leben", s);
+            assertTrue("Partie endet nicht", s.max(s.duration) < CAP_S);
+            assertTrue("mehr Leben, längere Partien", s.median(s.duration) > previous);
             previous = s.median(s.duration);
         }
     }

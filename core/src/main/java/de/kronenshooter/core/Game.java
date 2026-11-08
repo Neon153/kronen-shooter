@@ -15,7 +15,7 @@ import static de.kronenshooter.core.Tuning.*;
  * Schiff berührt. Ein Gegner, der das Schiff berührt, explodiert (ohne Punkte); danach ist das Schiff INVULNERABLE_S
  * lang unverwundbar gegen weitere Berührungen. Hinausfliegende Gegner kosten immer ein Leben. Kein Gegner kostet
  * mehr als ein Leben.</li>
- * <li>Bei 0 Leben ist die Partie vorbei (State.OVER).</li>
+ * <li>Zu Beginn 1 bis 5 Leben (Einstellung, Standard 3). Bei 0 Leben ist die Partie vorbei (State.OVER).</li>
  * </ul>
  * Zufall nur aus Random mit festem Seed: gleiche Eingaben ergeben die gleiche Partie (Tests, BalanceReport). Die
  * Gegner haben einen eigenen Zufallsgenerator (rnd), Funken und Sterne einen zweiten (fx), damit Optik den Ablauf
@@ -41,15 +41,24 @@ public final class Game {
 
     final int spawnLevel;
 
-    /** Partie mit der Gegnermenge „mittel“. */
+    final int startLives;
+
+    /** Partie mit der Gegnermenge „mittel“ und 3 Leben. */
     public Game(Arena arena, long seed) {
         this(arena, seed, SPAWN_DEFAULT);
     }
 
-    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel), siehe Tuning.SPAWN_LEVELS. */
+    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel), siehe Tuning.SPAWN_LEVELS; 3 Leben. */
     public Game(Arena arena, long seed, int spawnLevel) {
+        this(arena, seed, spawnLevel, LIVES);
+    }
+
+    /** Wie oben, mit startLives Leben (begrenzt auf LIVES_MIN … LIVES_MAX). */
+    public Game(Arena arena, long seed, int spawnLevel, int startLives) {
         this.arena = arena;
         this.spawnLevel = Math.max(0, Math.min(SPAWN_LEVELS.length - 1, spawnLevel));
+        this.startLives = Math.max(LIVES_MIN, Math.min(LIVES_MAX, startLives));
+        lives = this.startLives;
         rnd = new Random(seed);
         fx = new Random(seed ^ 0x5DEECE66DL);
         stars = new Stars(fx);
@@ -58,6 +67,11 @@ public final class Game {
 
     public int spawnLevel() {
         return spawnLevel;
+    }
+
+    /** Leben zu Beginn der Partie (1 … 5). */
+    public int startLives() {
+        return startLives;
     }
 
     /** Faktor auf das Grundtempo eines Gegners auf Höhe y (Mittelpunkt): Beschleunigung im Flug. */

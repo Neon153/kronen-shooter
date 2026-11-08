@@ -3,7 +3,7 @@
 Kleines Weltraum-Spiel für Wear-OS-Uhren, gebaut für die Google Pixel Watch 5. Die **Krone** steuert ein Raumschiff
 nach links und rechts, geschossen wird ununterbrochen von selbst. Von oben kommen Gegner in zufälliger Zahl und
 werden im Flug immer schneller: kleine fallen beim ersten Treffer, mittlere halten mehrere aus, große sehr viele. Jeder Gegner, der unten hinausfliegt oder
-das Schiff rammt, kostet eines von drei Leben. Es gibt kein Gewinnen, nur einen möglichst hohen Punktestand.
+das Schiff rammt, kostet ein Leben (1 bis 5, einstellbar). Es gibt kein Gewinnen, nur einen möglichst hohen Punktestand.
 
 | | |
 |---|---|
@@ -11,7 +11,7 @@ das Schiff rammt, kostet eines von drei Leben. Es gibt kein Gewinnen, nur einen 
 | Technik | Java, nur Android-Framework, keine Bibliotheken; minSdk 30 (Wear OS 3), targetSdk 35 |
 | Größe | APK rund 45 KB |
 | Daten | Rekorde und Einstellungen auf der Uhr, läuft ohne Handy |
-| Version | 1.1 (versionCode 2) |
+| Version | 1.2 (versionCode 3) |
 
 <p>
   <img src="docs/img/spiel.png" width="220" alt="Spiel mit allen drei Gegnerarten">
@@ -28,9 +28,10 @@ das Schiff rammt, kostet eines von drei Leben. Es gibt kein Gewinnen, nur einen 
 - Drei Gegnerarten mit 1, 5 und 40 Trefferpunkten, Punkte **1 / 3 / 10** je Abschuss.
 - Gegner kommen in Wellen mit zufälliger Anzahl, Mischung und Position und beschleunigen im Flug: oben langsam,
   auf Höhe des Schiffs fast eineinhalbmal so schnell. Alle Gegner liegen in der Reichweite des Schiffs.
-- **Gegnermenge** im Menü: wenig, mittel, viel, sehr viel. Rekord je Stufe.
+- **Gegnermenge** im Menü: wenig, mittel, viel, sehr viel.
+- **Leben** 1 bis 5 per Schieberegler (Standard 3). Rekord je Kombination aus Gegnermenge und Leben.
 - Die Schwierigkeit steigt über 5 Minuten und danach langsam weiter, damit jede Partie endet.
-- 3 Leben. Nach einer Kollision ist das Schiff 1 s unverwundbar, damit eine Gruppe nicht alle Leben auf einmal nimmt.
+- Nach einer Kollision ist das Schiff 1 s unverwundbar, damit eine Gruppe nicht alle Leben auf einmal nimmt.
 - Rekord bleibt gespeichert, „Neuer Rekord!“ am Ende.
 - Pause automatisch, sobald die App den Vordergrund verliert (Handgelenk runter, Benachrichtigung, Krone drücken).
   Weiter durch Tippen. Wischen nach rechts (Zurück) geht jederzeit ins Menü, auch mitten im Spiel.
@@ -47,13 +48,13 @@ Schritt in [docs/uhr.md](docs/uhr.md#auf-die-uhr-bringen).
 **Bauen:** Repository in Android Studio öffnen (*File → Open*), Gradle-Sync abwarten. Ohne Android Studio und ohne
 Googles Maven-Repository: `tools/build-apk.sh`. Details in [docs/entwicklung.md](docs/entwicklung.md).
 
-**Tests:** `./gradlew :core:test` oder `./tools/test.sh` (65 Tests, Balancing-Bericht, Vorschaubilder).
+**Tests:** `./gradlew :core:test` oder `./tools/test.sh` (68 Tests, Balancing-Bericht, Vorschaubilder).
 
 ## Bedienung
 
 | Wo | Was |
 |---|---|
-| Menü | Rekord für die eingestellte Gegnermenge, „Start“; darunter Gegner (wenig / mittel / viel / sehr viel), Krone (langsam / mittel / schnell), Richtung, Vibration, Bildrate, „Krone messen“. Antippen schaltet um. Krone scrollt. |
+| Menü | Rekord für die eingestellte Gegnermenge und Lebenszahl, „Start“; darunter Gegner (wenig / mittel / viel / sehr viel), Schieberegler Leben (1–5), Krone (langsam / mittel / schnell), Richtung, Vibration, Bildrate, „Krone messen“. Antippen schaltet um, den Regler ziehen oder antippen. Krone scrollt. |
 | Spiel | Krone drehen: Schiff nach links/rechts (Uhrzeigersinn = rechts). Wischen nach rechts: zurück ins Menü (die Partie endet, der Rekord bleibt). Tippen wirkt nicht. |
 | Pause | Tippen: weiter. Wischen: zurück ins Menü. |
 | Ende | Tippen (nach 0,8 s): neue Partie. Wischen: Menü. |
@@ -85,8 +86,8 @@ docs/                       Dokumentation
 ## Stand
 
 - **Noch nicht auf einer Uhr getestet.** Geprüft:
-  - die Spiellogik mit 65 Unit-Tests;
-  - das Balancing mit 1600 simulierten Partien;
+  - die Spiellogik mit 68 Unit-Tests;
+  - das Balancing mit 2600 simulierten Partien;
   - die Uhr-App mit `javac -Xlint:all -Werror` gegen API 35 und gegen API 30 (minSdk);
   - die APK mit aapt2, dx und apksigner gebaut;
   - alle `findViewById` stimmen mit den Layouts überein.

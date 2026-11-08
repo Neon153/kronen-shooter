@@ -31,6 +31,33 @@
             android:id="@+id/spawn"
             style="@style/Chip" />
 
+        <!-- Leben 1 … 5: Schieberegler (StepSlider löst beim Ziehen nach rechts kein Zurück aus) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/card"
+            android:orientation="vertical"
+            android:paddingBottom="4dp"
+            android:paddingTop="8dp">
+
+            <TextView
+                android:id="@+id/livesLabel"
+                style="@style/SliderLabel" />
+
+            <de.kronenshooter.wear.StepSlider
+                android:id="@+id/lives"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/lives_description"
+                android:max="5"
+                android:min="1"
+                android:progressBackgroundTint="@color/muted"
+                android:progressTint="@color/accent"
+                android:thumbTint="@color/accent"
+                android:tickMark="@drawable/slider_tick" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/sensitivity"
             style="@style/Chip" />

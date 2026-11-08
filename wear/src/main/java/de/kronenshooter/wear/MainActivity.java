@@ -3,17 +3,20 @@ package de.kronenshooter.wear;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import de.kronenshooter.core.Tuning;
 
 /**
- * Menü: Rekord für die eingestellte Gegnermenge, Start und Einstellungen (Gegnermenge, Empfindlichkeit und Richtung
- * der Krone, Vibration, Bildrate) sowie die Messseite für die Krone. Einstellungen wirken ab dem nächsten Spiel.
+ * Menü: Rekord für die eingestellte Kombination aus Gegnermenge und Leben, Start und Einstellungen (Gegnermenge,
+ * Leben per Schieberegler, Empfindlichkeit und Richtung der Krone, Vibration, Bildrate) sowie die Messseite für die
+ * Krone. Einstellungen wirken ab dem nächsten Spiel.
  */
 public final class MainActivity extends WearActivity implements View.OnClickListener {
     private Store store;
-    private TextView best, spawn, sensitivity, direction, vibration, fps;
+    private TextView best, spawn, livesLabel, sensitivity, direction, vibration, fps;
+    private SeekBar lives;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -24,6 +27,24 @@ public final class MainActivity extends WearActivity implements View.OnClickList
         roundPadding(findViewById(R.id.content), 0.14, 0.22, 0.13);
         best = findViewById(R.id.best);
         spawn = findViewById(R.id.spawn);
+        livesLabel = findViewById(R.id.livesLabel);
+        lives = findViewById(R.id.lives);
+        lives.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar bar, int value, boolean fromUser) {
+                if (!fromUser) return;
+                store.setLives(value);
+                refresh();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar bar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar bar) {
+            }
+        });
         sensitivity = findViewById(R.id.sensitivity);
         direction = findViewById(R.id.direction);
         vibration = findViewById(R.id.vibration);
@@ -63,11 +84,13 @@ public final class MainActivity extends WearActivity implements View.OnClickList
     }
 
     private void refresh() {
-        int level = store.spawnLevel();
+        int level = store.spawnLevel(), n = store.lives();
         String levelName = spawnName(this, level);
-        int b = store.best(level);
-        best.setText(b > 0 ? getString(R.string.best, levelName, b) : getString(R.string.best_none, levelName));
+        int b = store.best(level, n);
+        best.setText(b > 0 ? getString(R.string.best, b, levelName, n) : getString(R.string.best_none, levelName, n));
         spawn.setText(getString(R.string.spawn, levelName));
+        livesLabel.setText(getString(R.string.lives, n));
+        if (lives.getProgress() != n) lives.setProgress(n);
         sensitivity.setText(getString(R.string.sensitivity, sensitivityName(this, store.sensitivity())));
         direction.setText(getString(R.string.direction,
                 getString(store.invert() ? R.string.direction_inverted : R.string.direction_normal)));

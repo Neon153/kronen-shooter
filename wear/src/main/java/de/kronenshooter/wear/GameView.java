@@ -43,7 +43,7 @@ final class GameView extends View implements Choreographer.FrameCallback {
     private static final long FRAME_TOLERANCE_NS = 4_000_000L;
 
     private final boolean round;
-    private final int spawnLevel;
+    private final int spawnLevel, startLives;
     private final CanvasPainter painter = new CanvasPainter();
     private final GameRenderer renderer = new GameRenderer();
     private final FrameClock clock = new FrameClock();
@@ -54,12 +54,13 @@ final class GameView extends View implements Choreographer.FrameCallback {
     private boolean resumed, running;
     private int seenLifeLost;
 
-    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel). */
-    GameView(Context context, boolean round, int spawnLevel) {
+    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel); startLives: 1 … 5. */
+    GameView(Context context, boolean round, int spawnLevel, int startLives) {
         super(context);
         this.round = round;
         this.spawnLevel = spawnLevel;
-        game = new Game(new Arena(round), System.nanoTime(), spawnLevel);
+        this.startLives = startLives;
+        game = new Game(new Arena(round), System.nanoTime(), spawnLevel, startLives);
         setFps(Store.FPS_LOW);
     }
 
@@ -80,7 +81,7 @@ final class GameView extends View implements Choreographer.FrameCallback {
     }
 
     void newGame() {
-        game = new Game(new Arena(round), System.nanoTime(), spawnLevel);
+        game = new Game(new Arena(round), System.nanoTime(), spawnLevel, startLives);
         renderer.clearResult();
         seenLifeLost = 0;
         if (listener != null) listener.onNewGame();

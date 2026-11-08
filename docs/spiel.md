@@ -122,7 +122,8 @@ ohne Ende weiter: Es gibt kein Gewinnen, jede Partie endet irgendwann.
 
 ## Leben
 
-3 Leben. Eines geht verloren, wenn ein Gegner …
+1 bis 5 Leben zu Beginn, eingestellt im Menü per Schieberegler (Standard 3, `Tuning.LIVES_MIN`/`LIVES_MAX`). Eines
+geht verloren, wenn ein Gegner …
 
 - **unten hinausfliegt:** sobald er ganz außerhalb des sichtbaren Bereichs ist, also seine Oberkante überall in
   seiner Breite unter dem Kreisrand liegt (`Arena.goneBelow`). Am Rand der Bahn ist das bei einer Oberkante von
@@ -136,9 +137,10 @@ Zeit. Kein Gegner kostet mehr als ein Leben. Bei 0 Leben ist die Partie vorbei.
 
 ## Punkte und Rekord
 
-Punkte nur für Abschüsse durch Geschosse: klein 1, mittel 3, groß 10. Es gibt einen **Rekord je Gegnermenge**:
-Partien mit mehr Gegnern sind kürzer und punkten anders, ein gemeinsamer Rekord wäre nicht vergleichbar. Der Rekord
-aus Version 1.0 (immer „mittel“) wird als Rekord für „mittel“ übernommen.
+Punkte nur für Abschüsse durch Geschosse: klein 1, mittel 3, groß 10. Es gibt einen **Rekord je Kombination aus
+Gegnermenge und Leben** (4 × 5 = 20 Rekorde): Partien mit mehr Gegnern oder weniger Leben sind kürzer und punkten
+anders, ein gemeinsamer Rekord wäre nicht vergleichbar. Ältere Rekorde werden mit 3 Leben übernommen: der aus 1.0
+(immer „mittel“) als „mittel · 3 Leben“, die aus 1.1 je Gegnermenge als „… · 3 Leben“.
 
 Gespeichert wird am Ende und zusätzlich, wenn die App mit überbotenem Rekord in den Hintergrund geht oder per
 Wischen geschlossen wird. „Neuer Rekord!“ erscheint, wenn die Punkte den Rekord beim Start der Partie übertreffen.
@@ -148,7 +150,7 @@ Wischen geschlossen wird. „Neuer Rekord!“ erscheint, wenn die Punkte den Rek
 | Element | Lage (E) | Grund |
 |---|---|---|
 | Punkte | oben Mitte, Grundlinie y = 150, Größe 56 | dort ist der Kreis noch rund 650 E breit; der Blick ist ohnehin oben, wo die Gegner kommen. Gedimmt und unter den Gegnern gezeichnet, Ziffern gleich breit |
-| Leben | 3 kleine Schiffe bei y = 905 | unter dem Schiff, im Kreis noch ±270 E Platz |
+| Leben | bis zu 5 kleine Schiffe bei y = 905, mittig, 44 E Abstand | unter dem Schiff, im Kreis noch ±270 E Platz; 5 Leben brauchen ±106 E (`RendererTest`) |
 | Pause / Ende | Feld 170–830 × 330–740 | alle Ecken im Kreis (`RendererTest`) |
 
 ## Balancing
@@ -165,7 +167,23 @@ Mensch an der Krone.
 | „wie Mensch“: 600 E/s, neue Zielwahl nur alle 0,3 s | 186 s (103 – 240) | 283 |
 | ohne Krone (Schiff bleibt in der Mitte) | 9 s (7 – 16) | 0 |
 
-Je Gegnermenge („wie Mensch“, je 200 Partien):
+Je Lebenszahl („wie Mensch“, Gegnermenge mittel, je 200 Partien):
+
+| Leben | Dauer Median (min – max) | Punkte Median |
+|---|---|---|
+| 1 | 166 s (82 – 231) | 238 |
+| 2 | 177 s (102 – 238) | 265 |
+| 3 | 186 s (103 – 240) | 283 |
+| 4 | 190 s (103 – 240) | 298 |
+| 5 | 199 s (126 – 242) | 315 |
+
+Die Zahl der Leben verlängert eine Partie nur wenig (1 → 5 Leben: +20 %). Ein Bot macht am Anfang praktisch keine
+Fehler, und am Ende steht die Schwierigkeitswand: Sobald mehr Trefferpunkte kommen, als das Schiff mit 7 Schuss/s
+abbauen kann, sind auch 5 Leben in wenigen Sekunden weg. Bei einem Menschen, der früh Fehler macht, wirken die
+Leben stärker. Soll die Lebenszahl mehr ausmachen, müsste die Wand flacher werden (z. B. langsamerer Anstieg nach
+5 min).
+
+Je Gegnermenge („wie Mensch“, 3 Leben, je 200 Partien):
 
 | Stufe | Dauer Median (min – max) | Punkte Median |
 |---|---|---|
@@ -181,7 +199,8 @@ für die Uhr. Der Bericht prüft:
 - der Median liegt im Ziel (Bot 2–6 min, „wie Mensch“ 2–4 min);
 - ein großer Gegner ist auch am Rand der Bahn und beim höchsten Tempo der Steigerung (Grundtempo 66 E/s, mit
   Beschleunigung) allein immer zu schaffen: 9,1 s Zeit, 6,2 s nötig;
-- je Gegnermenge: mehr Gegner ergeben kürzere Partien, jede Partie endet, keine ist vor 30 s vorbei.
+- je Gegnermenge: mehr Gegner ergeben kürzere Partien, jede Partie endet, keine ist vor 30 s vorbei;
+- je Lebenszahl: mehr Leben ergeben längere Partien, jede Partie endet.
 
 **Herleitung.** Begrenzend ist die Feuerrate: Das Schiff schafft höchstens 7 Treffer pro Sekunde. Die Gegner
 verlangen im Mittel (Gegner je Welle / Wellenabstand) × (mittlere Trefferpunkte je Gegner). Mit den ersten

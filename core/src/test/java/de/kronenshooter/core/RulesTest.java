@@ -151,6 +151,27 @@ public class RulesTest {
     }
 
     @Test
+    public void startLivesConfigurableAndClamped() {
+        for (int n = Tuning.LIVES_MIN; n <= Tuning.LIVES_MAX; n++) {
+            Game g = new Game(new Arena(true), 7, Tuning.SPAWN_DEFAULT, n);
+            g.spawner.enabled = false;
+            assertEquals(n, g.lives());
+            assertEquals(n, g.startLives());
+            for (int k = 0; k < n; k++) g.enemies.add(EnemyType.SMALL, 180 + 60 * k, 1100, 0, false, 0);
+            g.step();
+            assertEquals("bei " + n + " Leben nach " + n + " Verlusten vorbei", Game.State.OVER, g.state());
+        }
+        Game one = new Game(new Arena(true), 7, Tuning.SPAWN_DEFAULT, 1);
+        one.spawner.enabled = false;
+        one.enemies.add(EnemyType.SMALL, 200, 1100, 0, false, 0);
+        one.step();
+        assertEquals(Game.State.OVER, one.state());
+        assertEquals(Tuning.LIVES_MIN, new Game(new Arena(true), 1, 1, 0).lives());
+        assertEquals(Tuning.LIVES_MAX, new Game(new Arena(true), 1, 1, 9).lives());
+        assertEquals(Tuning.LIVES, new Game(new Arena(true), 1).lives());
+    }
+
+    @Test
     public void livesNeverNegative() {
         Game g = quiet();
         for (int k = 0; k < 6; k++) g.enemies.add(EnemyType.SMALL, 170 + 60 * k, 1100, 0, false, 0);
