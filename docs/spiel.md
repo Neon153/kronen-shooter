@@ -1,7 +1,7 @@
 # Spielregeln und Werte
 
 Alle Werte stehen in `core/…/Tuning.java` und `EnemyType.java`. Die Regeln setzt `Game` um, Prüfungen in
-`RulesTest`, `CollisionTest`, `SpawnerTest` und `ArenaTest`.
+`RulesTest`, `CollisionTest`, `SpawnerTest`, `FlightTest` und `ArenaTest`.
 
 ## Spielfeld
 
@@ -41,19 +41,49 @@ Mit „mittel“ braucht die ganze Bahn rund 330 dp Drehung.
 
 ## Gegner
 
-| Art | Größe (E) | Trefferpunkte | Tempo (E/s) | Punkte | Treffer sichtbar als |
+| Art | Größe (E) | Trefferpunkte | Grundtempo oben (E/s) | Punkte | Treffer sichtbar als |
 |---|---|---|---|---|---|
-| klein | 50 × 39 | 1 | 160–220 | 1 | Explosion |
-| mittel | 80 × 49 | 5 | 110–140 | 3 | weißer Blitz, Funken, Lebensbalken |
-| groß | 180 × 115 | 40 | 40–50 | 10 | Funken, Lebensbalken |
+| klein | 50 × 39 | 1 | 130–180 | 1 | Explosion |
+| mittel | 80 × 49 | 5 | 90–115 | 3 | weißer Blitz, Funken, Lebensbalken |
+| groß | 180 × 115 | 40 | 33–41 | 10 | Funken, Lebensbalken |
 
-Das Tempo ist zufällig im Bereich und wird mit dem Tempofaktor der Schwierigkeit multipliziert. Große Gegner blitzen
-bewusst nicht: Bei 7 Treffern/s würden sie dauernd weiß flackern, und eine große weiße Fläche kostet auf OLED
-unnötig Strom. Ab 1 Minute pendeln manche kleinen Gegner seitlich (± 40 E, 2,4 rad/s).
+Das Grundtempo ist zufällig im Bereich und wird mit dem Tempofaktor der Schwierigkeit multipliziert. Große Gegner
+blitzen bewusst nicht: Bei 7 Treffern/s würden sie dauernd weiß flackern, und eine große weiße Fläche kostet auf
+OLED unnötig Strom. Ab 1 Minute pendeln manche kleinen Gegner seitlich (± 40 E, 2,4 rad/s).
+
+### Beschleunigung im Flug
+
+Gegner werden schneller, je weiter unten sie sind: Tempo = Grundtempo × (1 + 0,6 · y / 1000), mit y auf [0, 1000]
+begrenzt (`Game.flightFactor`, `Tuning.FLIGHT_ACCEL`). Oberhalb des Spielfelds fliegen sie mit dem Grundtempo.
+
+| Höhe | oben (y = 0) | Mitte (500) | Schiff (800) | unten (1000) |
+|---|---|---|---|---|
+| Faktor | 1,00 | 1,30 | 1,48 | 1,60 |
+
+Die Flugzeit ergibt sich aus dy/dt = v₀ · (1 + a·y/1000):
+t = 1000 / (a·v₀) · ln((1 + a·y₁/1000) / (1 + a·y₀/1000)) (`Game.flightTime`, mit der Simulation verglichen in
+`FlightTest`). Vom oberen Rand bis zum Schiff ist das 0,816 · 800 / v₀. Die Grundtempi wurden deshalb um rund 18 %
+gesenkt (vorher 160–220, 110–140, 40–50 E/s): Die Zeit bis zum Schiff bleibt im Mittel gleich (höchstens 3 %
+Abweichung, `FlightTest`), aber die Gegner kommen langsam herein und werden zum Schiff hin schnell.
+
+Unabhängig davon steigt der Tempofaktor mit der Spielzeit (siehe [Schwierigkeit](#schwierigkeit)): Gegner werden
+also im Flug schneller und im Lauf der Partie insgesamt schneller.
 
 ## Wellen und Fairness
 
-Der `Spawner` erzeugt Wellen. Zufällig sind:
+Der `Spawner` erzeugt Wellen. Wie viele, legt die **Gegnermenge** im Menü fest (`Tuning.SPAWN_LEVELS`):
+
+| Stufe | Faktor | Wirkung |
+|---|---|---|
+| wenig | 0,6 | Wellen im 1,67-fachen Abstand, Obergrenze der Trefferpunkte × 0,6 |
+| mittel | 1,0 | Standard, wie in den Tabellen dieses Dokuments |
+| viel | 1,5 | Wellen im 0,67-fachen Abstand, Obergrenze × 1,5 |
+| sehr viel | 2,2 | Wellen im 0,45-fachen Abstand, Obergrenze × 2,2 |
+
+Der Faktor wirkt auf den Abstand der Wellen und auf die Obergrenze der Trefferpunkte; ohne die zweite würde die
+Grenze eine höhere Menge wieder abschneiden. Größe der Wellen, Mischung und Tempo bleiben gleich.
+
+Zufällig sind:
 - der Abstand der Wellen (± 25 % um den Mittelwert);
 - die Anzahl (1 bis zur Höchstzahl);
 - die Art jedes Gegners nach Gewichten;
@@ -68,13 +98,15 @@ Gegner einer Welle kommen versetzt, je weiterer Gegner bis zu 110 E weiter oben.
   Ohne diese Regel könnte ein Gegner am Rand auftauchen, den man nicht treffen kann, und trotzdem ein Leben kosten.
 - **Von oben:** Neue Gegner beginnen ganz oberhalb des sichtbaren Bereichs.
 - **Keine Überlappung** mit vorhandenen Gegnern beim Erscheinen (12 E Abstand, sonst bis zu 12 neue Versuche).
-- **Obergrenze der Trefferpunkte** aller Gegner im Spiel, gegen zufällige Spitzen, die nicht zu schaffen sind.
+- **Obergrenze der Trefferpunkte** aller Gegner im Spiel (mal Gegnermenge), gegen zufällige Spitzen, die nicht zu
+  schaffen sind.
 - **Große Gegner** frühestens nach 1 Minute, höchstens einer gleichzeitig, ab 3 Minuten zwei.
 - Die erste Welle kommt nach 1,5 s.
 
 ## Schwierigkeit
 
-`Difficulty` hängt nur von der Spielzeit t ab (Pausen zählen nicht). Bis 5 Minuten steigen alle Werte linear vom
+`Difficulty` hängt nur von der Spielzeit t ab (Pausen zählen nicht). Die Tabelle gilt für die Gegnermenge
+„mittel“; Wellenabstand und Grenze ändern sich mit der Stufe wie oben. Bis 5 Minuten steigen alle Werte linear vom
 Start- auf den Endwert. Danach steigen Tempo (+0,1 je Minute) und Obergrenze der Trefferpunkte (+15 je Minute)
 ohne Ende weiter: Es gibt kein Gewinnen, jede Partie endet irgendwann.
 
@@ -104,9 +136,12 @@ Zeit. Kein Gegner kostet mehr als ein Leben. Bei 0 Leben ist die Partie vorbei.
 
 ## Punkte und Rekord
 
-Punkte nur für Abschüsse durch Geschosse: klein 1, mittel 3, groß 10. Der Rekord wird am Ende gespeichert und
-zusätzlich, wenn die App mit überbotenem Rekord in den Hintergrund geht. „Neuer Rekord!“ erscheint, wenn die
-Punkte den Rekord beim Start der Partie übertreffen.
+Punkte nur für Abschüsse durch Geschosse: klein 1, mittel 3, groß 10. Es gibt einen **Rekord je Gegnermenge**:
+Partien mit mehr Gegnern sind kürzer und punkten anders, ein gemeinsamer Rekord wäre nicht vergleichbar. Der Rekord
+aus Version 1.0 (immer „mittel“) wird als Rekord für „mittel“ übernommen.
+
+Gespeichert wird am Ende und zusätzlich, wenn die App mit überbotenem Rekord in den Hintergrund geht oder per
+Wischen geschlossen wird. „Neuer Rekord!“ erscheint, wenn die Punkte den Rekord beim Start der Partie übertreffen.
 
 ## Anzeige
 
@@ -118,24 +153,35 @@ Punkte den Rekord beim Start der Partie übertreffen.
 
 ## Balancing
 
-Gemessen mit `BalanceReport`: je 200 Partien (Seeds 1000–1199) für vier Spieler. Der Bot fährt zum Gegner mit der
-frühesten Frist, für den noch nicht genug Geschosse unterwegs sind. Frist heißt: Zeit bis zur Berührung minus
-nötige Schüsse und Flugzeit. Sein Tempo ist begrenzt wie ein Mensch an der Krone.
+Gemessen mit `BalanceReport`: je 200 Partien (Seeds 1000–1199) für vier Spieler bei Gegnermenge „mittel“. Der Bot
+fährt zum Gegner mit der frühesten Frist, für den noch nicht genug Geschosse unterwegs sind. Frist heißt: Zeit bis
+zur Berührung (mit Beschleunigung im Flug) minus nötige Schüsse und Flugzeit. Sein Tempo ist begrenzt wie ein
+Mensch an der Krone.
 
 | Spieler | Dauer Median (min – max) | Punkte Median |
 |---|---|---|
-| Bot, 1200 E/s (ganze Bahn in 0,55 s) | 220 s (159 – 269) | 392 |
-| Bot, 600 E/s | 192 s (116 – 260) | 304 |
-| „wie Mensch“: 600 E/s, neue Zielwahl nur alle 0,3 s | 182 s (110 – 257) | 279 |
-| ohne Krone (Schiff bleibt in der Mitte) | 10 s (7 – 16) | 0 |
+| Bot, 1200 E/s (ganze Bahn in 0,55 s) | 222 s (167 – 294) | 395 |
+| Bot, 600 E/s | 192 s (107 – 249) | 312 |
+| „wie Mensch“: 600 E/s, neue Zielwahl nur alle 0,3 s | 186 s (103 – 240) | 283 |
+| ohne Krone (Schiff bleibt in der Mitte) | 9 s (7 – 16) | 0 |
+
+Je Gegnermenge („wie Mensch“, je 200 Partien):
+
+| Stufe | Dauer Median (min – max) | Punkte Median |
+|---|---|---|
+| wenig | 266 s (196 – 314) | 321 |
+| mittel | 186 s (103 – 240) | 283 |
+| viel | 139 s (79 – 198) | 272 |
+| sehr viel | 93 s (66 – 148) | 221 |
 
 Ein echter Mensch entscheidet schlechter als jeder Bot. Erwartet sind deshalb eher 2–3 Minuten je Partie, passend
 für die Uhr. Der Bericht prüft:
 - jede Partie endet;
 - kein Bot ist vor 90 s am Ende;
 - der Median liegt im Ziel (Bot 2–6 min, „wie Mensch“ 2–4 min);
-- ein großer Gegner ist auch am Rand der Bahn und beim höchsten Tempo der Steigerung (80 E/s) allein immer zu
-  schaffen: 9,0 s Zeit, 6,2 s nötig.
+- ein großer Gegner ist auch am Rand der Bahn und beim höchsten Tempo der Steigerung (Grundtempo 66 E/s, mit
+  Beschleunigung) allein immer zu schaffen: 9,1 s Zeit, 6,2 s nötig;
+- je Gegnermenge: mehr Gegner ergeben kürzere Partien, jede Partie endet, keine ist vor 30 s vorbei.
 
 **Herleitung.** Begrenzend ist die Feuerrate: Das Schiff schafft höchstens 7 Treffer pro Sekunde. Die Gegner
 verlangen im Mittel (Gegner je Welle / Wellenabstand) × (mittlere Trefferpunkte je Gegner). Mit den ersten
@@ -153,7 +199,9 @@ Varianten:
 | **F (gewählt)** | wie E, Abstand 2,4 → 1,0 s | 220 s | 187 s (min 116) |
 
 F hat den fairsten Anfang (das späteste frühe Ende). Die Werte in der Tabelle oben sind der Stand nach den letzten
-Änderungen (Funken mit eigenem Zufallsgenerator), deshalb leicht anders als in dieser Zeile.
+Änderungen (Funken mit eigenem Zufallsgenerator, in 1.1 Beschleunigung im Flug), deshalb leicht anders als in dieser
+Zeile. Die Beschleunigung mit den gesenkten Grundtempi hat das Ergebnis kaum verschoben (Bot 220 → 222 s,
+„wie Mensch“ 182 → 186 s).
 
 Ein erster Bot wählte das Ziel nach Spielraum einschließlich Weg. Er pendelte zwischen zwei ähnlich dringenden
 Gegnern und blieb stehen (Median 46 s); der Vergleich nach Frist ohne Weg und das Festhalten am Ziel beheben das.

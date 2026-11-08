@@ -49,10 +49,14 @@ public class BalanceReport {
     }
 
     static Stats play(Bot proto) {
+        return play(proto, Tuning.SPAWN_DEFAULT);
+    }
+
+    static Stats play(Bot proto, int spawnLevel) {
         Stats s = new Stats();
         for (int i = 0; i < GAMES; i++) {
             Bot bot = proto == null ? null : proto.fresh();
-            Game g = new Game(new Arena(true), 1000 + i);
+            Game g = new Game(new Arena(true), 1000 + i, spawnLevel);
             while (g.state() == Game.State.PLAYING && g.time() < CAP_S) {
                 if (bot != null) bot.control(g);
                 g.step();
@@ -83,7 +87,7 @@ public class BalanceReport {
         Stats slow = play(new Bot(BOT_SPEED / 2));
         Stats human = play(new Bot(BOT_SPEED / 2, HUMAN_REACTION_S));
         Stats idle = play(null);
-        System.out.println("BalanceReport (" + GAMES + " Partien je Spieler, runde Uhr):");
+        System.out.println("BalanceReport (" + GAMES + " Partien je Spieler, runde Uhr, Gegnermenge mittel):");
         print("Bot 1200 E/s", bot);
         print("Bot 600 E/s", slow);
         print("wie Mensch", human);
@@ -103,9 +107,28 @@ public class BalanceReport {
     }
 
     /**
+     * Gegnermenge: Partien des menschenähnlichen Bots je Stufe. Mehr Gegner = kürzere Partien; auch bei „sehr viel“
+     * ist der Anfang nicht sofort verloren, bei „wenig“ endet trotzdem jede Partie.
+     */
+    @Test
+    public void spawnLevels() {
+        String[] names = {"wenig", "mittel", "viel", "sehr viel"};
+        double previous = Double.POSITIVE_INFINITY;
+        System.out.println("Gegnermenge (wie Mensch, " + GAMES + " Partien je Stufe):");
+        for (int level = 0; level < Tuning.SPAWN_LEVELS.length; level++) {
+            Stats s = play(new Bot(BOT_SPEED / 2, HUMAN_REACTION_S), level);
+            print(names[level] + " ×" + Tuning.SPAWN_LEVELS[level], s);
+            assertTrue("Partie endet nicht", s.max(s.duration) < CAP_S);
+            assertTrue("mehr Gegner, kürzere Partien", s.median(s.duration) < previous);
+            assertTrue("unfairer Anfang bei " + names[level], s.min(s.duration) > 30);
+            previous = s.median(s.duration);
+        }
+    }
+
+    /**
      * Ein großer Gegner allein: ab dem Moment, in dem seine Unterkante sichtbar wird (am Rand der Bahn am spätesten),
      * bis zur Berührung mit dem Schiff muss Zeit für alle Schüsse plus Flugzeit bleiben, mit dem höchsten Tempo
-     * während der Steigerung.
+     * während der Steigerung und mit der Beschleunigung im Flug.
      */
     @Test
     public void largeEnemyAloneIsAlwaysKillableDuringRamp() {
@@ -117,9 +140,9 @@ public class BalanceReport {
         double flight = (Tuning.SHIP_Y - visibleBottom) / Tuning.BULLET_SPEED;
         double need = t.hp / Tuning.FIRE_RATE + flight;
         double fastest = t.vMax * Difficulty.speed(Tuning.RAMP_S);
-        double available = (contact - visibleBottom) / fastest;
-        System.out.printf("Großer Gegner am Rand der Bahn: %.1f s Zeit, %.1f s nötig (Tempo %.0f E/s)%n", available,
-                need, fastest);
+        double available = Game.flightTime(fastest, visibleBottom - t.h / 2, contact - t.h / 2);
+        System.out.printf("Großer Gegner am Rand der Bahn: %.1f s Zeit, %.1f s nötig (Grundtempo %.0f E/s)%n",
+                available, need, fastest);
         assertTrue(available > need);
     }
 }

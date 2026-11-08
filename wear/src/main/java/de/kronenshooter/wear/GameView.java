@@ -22,8 +22,8 @@ import de.kronenshooter.core.GameRenderer;
  * <li>Die Krone verschiebt das Schiff sofort; sichtbar wird es mit dem nächsten Bild.</li>
  * <li>Tippen: in Pause weiter, nach dem Ende (frühestens nach 0,8 s, gegen versehentliches Tippen) neue Partie.
  * Während des Spiels wird Tippen ignoriert (die Hand an der Krone streift leicht den Rand).</li>
- * <li>Solange gespielt wird, meldet die Ansicht waagerechte Scrollbarkeit. Dadurch fängt das Wischen zum Schließen
- * (Standard auf Wear OS) nichts ab; in Pause und nach dem Ende schließt Wischen das Spiel.</li>
+ * <li>Wischen nach rechts (Zurück, Standard auf Wear OS) schließt das Spiel immer, auch mitten in einer Partie.
+ * Die Ansicht meldet deshalb keine waagerechte Scrollbarkeit. Der Rekord wird dabei in onPause gesichert.</li>
  * </ul>
  */
 final class GameView extends View implements Choreographer.FrameCallback {
@@ -43,6 +43,7 @@ final class GameView extends View implements Choreographer.FrameCallback {
     private static final long FRAME_TOLERANCE_NS = 4_000_000L;
 
     private final boolean round;
+    private final int spawnLevel;
     private final CanvasPainter painter = new CanvasPainter();
     private final GameRenderer renderer = new GameRenderer();
     private final FrameClock clock = new FrameClock();
@@ -53,10 +54,12 @@ final class GameView extends View implements Choreographer.FrameCallback {
     private boolean resumed, running;
     private int seenLifeLost;
 
-    GameView(Context context, boolean round) {
+    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel). */
+    GameView(Context context, boolean round, int spawnLevel) {
         super(context);
         this.round = round;
-        game = new Game(new Arena(round), System.nanoTime());
+        this.spawnLevel = spawnLevel;
+        game = new Game(new Arena(round), System.nanoTime(), spawnLevel);
         setFps(Store.FPS_LOW);
     }
 
@@ -77,7 +80,7 @@ final class GameView extends View implements Choreographer.FrameCallback {
     }
 
     void newGame() {
-        game = new Game(new Arena(round), System.nanoTime());
+        game = new Game(new Arena(round), System.nanoTime(), spawnLevel);
         renderer.clearResult();
         seenLifeLost = 0;
         if (listener != null) listener.onNewGame();
@@ -158,11 +161,6 @@ final class GameView extends View implements Choreographer.FrameCallback {
     protected void onDraw(Canvas canvas) {
         painter.begin(canvas);
         renderer.draw(game, painter);
-    }
-
-    @Override
-    public boolean canScrollHorizontally(int direction) {
-        return game.state() == Game.State.PLAYING;
     }
 
     @Override

@@ -11,8 +11,8 @@ android {
         applicationId = "de.kronenshooter"
         minSdk = 30 // Wear OS 3
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
     }
 
     // Schlüssel liegt im Repository (nur private Nutzung, siehe docs/entwicklung.md)

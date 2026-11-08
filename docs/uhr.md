@@ -10,7 +10,7 @@ braucht kein Netz und speichert nur Rekord und Einstellungen auf der Uhr.
 | Technik | Java, nur Android-Framework (keine AndroidX-Bibliotheken) |
 | Paketname | `de.kronenshooter`, Code in `de.kronenshooter.wear` |
 | Berechtigungen | nur `VIBRATE` (normale Berechtigung, ohne Nachfrage) |
-| Version | 1.0 (versionCode 1) |
+| Version | 1.1 (versionCode 2) |
 
 ## Bedienung
 
@@ -18,8 +18,8 @@ Jede Seite ist eine eigene Activity. **Wischen nach rechts** geht eine Seite zur
 
 | Seite | Inhalt | Bedienung |
 |---|---|---|
-| Menü (Start) | Name, Rekord, „Start“, Krone (langsam / mittel / schnell), Richtung (normal / umgekehrt), Vibration (an / aus), Bildrate (30 / 60), „Krone messen“, Kurzhilfe | Antippen startet bzw. schaltet um, wird sofort gespeichert. Krone scrollt. Wirkt ab dem nächsten Spiel |
-| Spiel | Punkte oben, Schiff unten, darunter die Leben | **Krone:** Schiff links/rechts. Tippen und Wischen wirken nicht (die Hand an der Krone streift leicht den Rand) |
+| Menü (Start) | Name, Rekord für die eingestellte Gegnermenge, „Start“, Gegner (wenig / mittel / viel / sehr viel), Krone (langsam / mittel / schnell), Richtung (normal / umgekehrt), Vibration (an / aus), Bildrate (30 / 60), „Krone messen“, Kurzhilfe | Antippen startet bzw. schaltet um, wird sofort gespeichert. Krone scrollt. Wirkt ab dem nächsten Spiel |
+| Spiel | Punkte oben, Schiff unten, darunter die Leben | **Krone:** Schiff links/rechts. **Wischen nach rechts:** zurück ins Menü, die Partie endet, der Rekord bleibt. Tippen wirkt nicht (die Hand an der Krone streift leicht den Rand) |
 | Pause | Feld „Pause“ über dem eingefrorenen Spiel | Tippen: weiter. Wischen: Menü |
 | Ende | „Vorbei“, Punkte, „Neuer Rekord!“ oder „Rekord …“ | Tippen (frühestens nach 0,8 s): neue Partie. Wischen: Menü |
 | Krone messen | Summe der Drehung in dp, Anzahl Ereignisse, letzte Drehung, Umdrehungen für die ganze Bahn | Krone drehen; Antippen setzt zurück |
@@ -31,8 +31,10 @@ Jede Seite ist eine eigene Activity. **Wischen nach rechts** geht eine Seite zur
 - **Bildschirm:** bleibt wach, solange gespielt wird (`FLAG_KEEP_SCREEN_ON`). Stillstehen ist im Spiel normal, ohne
   das ginge der Bildschirm mitten im Spiel aus. In Pause, am Ende und im Menü gilt das normale Zeitlimit der Uhr.
 - **Vibration:** kurz und kräftig bei jedem verlorenen Leben, doppelt am Ende.
-- Eine laufende Partie wird nicht gespeichert. Beendet das System die App im Hintergrund, ist sie verloren, der
-  Rekord nicht.
+- Eine laufende Partie wird nicht gespeichert. Wischt man zurück oder beendet das System die App im Hintergrund,
+  ist sie verloren, der Rekord nicht (er wird in `onPause` gesichert).
+- **Rekord je Gegnermenge:** Das Menü zeigt den Rekord der eingestellten Stufe. Der Rekord aus Version 1.0 gilt
+  als Rekord für „mittel“.
 
 ## Energie
 
@@ -182,7 +184,7 @@ der Painter-Umweg erlaubt Zeichentests (`RecordingPainter`) und Vorschaubilder (
 
 | Klasse (core) | Aufgabe |
 |---|---|
-| `Game` | eine Partie: fester Schritt, Bewegung, Dauerfeuer, Treffer, Kollisionen, Leben, Punkte, Zustand (Spiel / Pause / Ende), Zähler für Vibration und Statistik |
+| `Game` | eine Partie: fester Schritt, Bewegung mit Beschleunigung im Flug, Dauerfeuer, Treffer, Kollisionen, Leben, Punkte, Zustand (Spiel / Pause / Ende), Gegnermenge, Zähler für Vibration und Statistik |
 | `Arena` | Kreisgeometrie: Breite auf Höhe y, Ränder, Bahn des Schiffs, Bereich für neue Gegner, „ganz unten hinaus“ |
 | `Spawner`, `Difficulty` | Wellen mit Zufall und Fairness-Regeln; Schwierigkeit als Funktion der Spielzeit |
 | `Enemies`, `Bullets`, `Particles`, `Stars` | feste Speicher als Arrays |
@@ -196,24 +198,24 @@ der Painter-Umweg erlaubt Zeichentests (`RecordingPainter`) und Vorschaubilder (
 | `WearActivity` | Grundlage: Innenabstände für runde Bildschirme, Krone (`dispatchGenericMotionEvent`, Quelle `ROTARY_ENCODER`) |
 | `MainActivity` | Menü und Einstellungen |
 | `GameActivity` | Lebenszyklus, Krone an das Spiel, Bildschirm wach halten, Bildrate anfordern, Vibration, Rekord |
-| `GameView` | Takt über den Choreographer (nur beim Spielen, Vsyncs zwischen den Bildern ausgelassen), Tippen in Pause und am Ende, sperrt Wischen zum Schließen während des Spiels |
+| `GameView` | Takt über den Choreographer (nur beim Spielen, Vsyncs zwischen den Bildern ausgelassen), Tippen in Pause und am Ende |
 | `CanvasPainter` | `Painter` auf `Canvas`, Sprites als Bitmaps ohne Filter |
 | `CrownTestActivity` | Messseite für die Krone |
-| `Store` | Rekord und Einstellungen (SharedPreferences `kronen_shooter`) |
+| `Store` | Rekorde je Gegnermenge und Einstellungen (SharedPreferences `kronen_shooter`), Übernahme des Rekords aus 1.0 |
 
 **Ein Bild im Spiel:** Der Choreographer meldet den Vsync. Ist seit dem letzten Bild weniger als 1/Bildrate
 (minus 4 ms Toleranz) vergangen, wartet `GameView` auf den nächsten Vsync. Sonst bestimmt `FrameClock` die Zahl der
 Schritte (meist 2 bei 30 Bildern/s), `Game.step()` läuft so oft, dann zeichnet `GameRenderer` über
 `CanvasPainter`. Endet die Partie, steht der Takt sofort.
 
-**Wischen zum Schließen:** Wear OS schließt eine Activity, wenn man nach rechts wischt, außer die Ansicht unter dem
-Finger meldet, dass sie waagerecht scrollen kann. `GameView` meldet das, solange gespielt wird (derselbe Weg wie
-beim Fadenkreuz in substanz-tracker).
+**Wischen zum Schließen (Zurück):** Wear OS schließt eine Activity, wenn man nach rechts wischt, außer die Ansicht
+unter dem Finger meldet, dass sie waagerecht scrollen kann. Version 1.0 hat das während des Spiels gesperrt (gegen
+versehentliches Wischen); seit 1.1 meldet `GameView` keine Scrollbarkeit mehr, Zurück funktioniert also immer.
 
 ## Stand und Grenzen
 
-- **Version 1.0 ist noch nicht auf einer Uhr getestet.** Geprüft wurde:
-  - 58 Unit-Tests der Spiellogik inklusive Balancing-Bericht;
+- **Version 1.1 ist noch nicht auf einer Uhr getestet** (1.0 lief auf der Pixel Watch 5). Geprüft wurde:
+  - 65 Unit-Tests der Spiellogik inklusive Balancing-Bericht;
   - die Uhr-App kompiliert mit `javac -Xlint:all -Werror` gegen API 35;
   - gegen API 30 ist der einzige neuere Aufruf `View.setRequestedFrameRate`, hinter einer Versionsabfrage;
   - die APK ist mit aapt2, dx, zipalign und apksigner gebaut;
@@ -222,6 +224,6 @@ beim Fadenkreuz in substanz-tracker).
 - Nicht geprüft: Gradle-Sync (Googles Maven-Repository war nicht erreichbar; die Gradle-Dateien entsprechen
   substanz-tracker ohne Tiles), Verhalten auf dem Gerät.
 - Zu messen bzw. einzustellen an der Uhr: Empfindlichkeit der Krone ([oben](#krone-einstellen)), Bildrate und Akku
-  ([Energie](#energie)), ob Wischen während des Spiels wirklich nichts schließt.
+  ([Energie](#energie)), ob Zurück-Wischen mitten im Spiel zuverlässig ins Menü führt.
 - Keine Kachel und keine Komplikation (Rekord auf dem Zifferblatt). Beides bräuchte AndroidX-Bibliotheken.
 - Kein Ton (nicht gefordert, und auf der Uhr meist unpassend).

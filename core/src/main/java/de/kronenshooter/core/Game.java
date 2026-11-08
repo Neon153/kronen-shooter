@@ -8,6 +8,7 @@ import static de.kronenshooter.core.Tuning.*;
  * Eine Partie. Läuft in festen Schritten (step, je STEP Sekunden); die Krone verschiebt das Schiff sofort
  * (moveShip). Regeln:
  * <ul>
+ * <li>Gegner fliegen senkrecht nach unten und werden dabei schneller (flightFactor, Tuning.FLIGHT_ACCEL).</li>
  * <li>Das Schiff feuert ununterbrochen (FIRE_RATE). Ein Treffer kostet den Gegner einen Trefferpunkt; bei 0 ist er
  * abgeschossen und bringt seine Punkte (1 / 3 / 10).</li>
  * <li>Ein Leben geht verloren, wenn ein Gegner den sichtbaren Bereich unten verlässt (Arena.goneBelow) oder das
@@ -38,12 +39,52 @@ public final class Game {
     int shots, hits, kills, lifeLost, lostByExit, lostByCollision;
     final int[] killsByType = new int[EnemyType.values().length];
 
+    final int spawnLevel;
+
+    /** Partie mit der Gegnermenge „mittel“. */
     public Game(Arena arena, long seed) {
+        this(arena, seed, SPAWN_DEFAULT);
+    }
+
+    /** spawnLevel: Gegnermenge 0 … 3 (wenig, mittel, viel, sehr viel), siehe Tuning.SPAWN_LEVELS. */
+    public Game(Arena arena, long seed, int spawnLevel) {
         this.arena = arena;
+        this.spawnLevel = Math.max(0, Math.min(SPAWN_LEVELS.length - 1, spawnLevel));
         rnd = new Random(seed);
         fx = new Random(seed ^ 0x5DEECE66DL);
         stars = new Stars(fx);
-        spawner = new Spawner(arena, rnd);
+        spawner = new Spawner(arena, rnd, SPAWN_LEVELS[this.spawnLevel]);
+    }
+
+    public int spawnLevel() {
+        return spawnLevel;
+    }
+
+    /** Faktor auf das Grundtempo eines Gegners auf Höhe y (Mittelpunkt): Beschleunigung im Flug. */
+    public static double flightFactor(double y) {
+        return 1 + FLIGHT_ACCEL * Math.max(0, Math.min(SIZE, y)) / SIZE;
+    }
+
+    /**
+     * Flugzeit in s eines Gegners mit Grundtempo v0 von Höhe y0 bis y1 (Mittelpunkt). Oberhalb von 0 fliegt er mit
+     * v0, zwischen 0 und 1000 wächst das Tempo linear mit y (dy/dt = v0 · (1 + a·y/1000), integriert:
+     * t = 1000 / (a · v0) · ln((1 + a·y1/1000) / (1 + a·y0/1000))), unterhalb von 1000 mit v0 · (1 + a).
+     */
+    public static double flightTime(double v0, double y0, double y1) {
+        if (!(v0 > 0) || y1 <= y0) return 0;
+        double t = 0;
+        if (y0 < 0) {
+            t += (Math.min(0, y1) - y0) / v0;
+            y0 = 0;
+        }
+        double mid = Math.min(y1, SIZE);
+        if (mid > y0) {
+            t += FLIGHT_ACCEL == 0 ? (mid - y0) / v0
+                    : SIZE / (FLIGHT_ACCEL * v0)
+                            * Math.log((1 + FLIGHT_ACCEL * mid / SIZE) / (1 + FLIGHT_ACCEL * y0 / SIZE));
+        }
+        if (y1 > SIZE) t += (y1 - Math.max(y0, SIZE)) / (v0 * (1 + FLIGHT_ACCEL));
+        return t;
     }
 
     public State state() {
@@ -107,7 +148,7 @@ public final class Game {
         Enemies e = enemies;
         for (int i = 0; i < e.alive.length; i++) {
             if (!e.alive[i]) continue;
-            e.y[i] += e.vy[i] * dt;
+            e.y[i] += e.vy[i] * flightFactor(e.y[i]) * dt;
             if (e.zigzag[i]) e.x[i] = e.baseX[i] + ZIGZAG_AMP * Math.sin(ZIGZAG_OMEGA * time + e.phase[i]);
             if (e.flash[i] > 0) e.flash[i] = Math.max(0, e.flash[i] - dt);
         }
