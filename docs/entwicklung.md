@@ -35,11 +35,12 @@ Hamcrest 1.3, unter Ubuntu aus den Paketen `junit4` und `libhamcrest-java`. Es p
 | `RulesTest` | Leben: Hinausfliegen und Kollision kosten genau eins, Rammen durch große Gegner, Gruppe = ein Leben, Unverwundbarkeit, Hinausfliegen trotz Unverwundbarkeit, Ende bei 0 Leben, nie negativ; Punkte 1 / 3 / 10, Trefferpunkte, Blitz nur bei mittleren; Dauerfeuer; Pause friert alles ein; Krone mit Begrenzung; gleicher Seed = gleiche Partie |
 | `CollisionTest` | kein Durchspringen (Raster 1,7 E), unterer Gegner zuerst, ein Geschoss = ein Treffer, knapp daneben = kein Treffer, keine Treffer oberhalb des sichtbaren Bereichs, kleinere Trefferfläche bei Kollisionen |
 | `SpawnerTest` | über 10.000 Gegner aus 40 Seeds: in der Bahn (auch pendelnd), von oberhalb, keine Überlappung, Tempo im Bereich, Grenze der Trefferpunkte, große erst ab 1 min und höchstens maxLarge; während einer Partie bleiben alle Gegner in der Bahn; erste Welle nach 1,5 s; eckige Uhren |
+| `FlightTest` | Beschleunigung im Flug: Faktor nach Höhe, Gegner wird im Flug schneller, `flightTime` stimmt mit der Simulation überein (1 %), Zeit bis zum Schiff wie vor der Beschleunigung (3 %); Gegnermenge: mehr Stufe = mehr Gegner, Grenze der Trefferpunkte skaliert, Begrenzung der Stufe |
 | `DifficultyTest` | Start- und Endwerte, alle Werte monoton, Tempo steigt ohne Ende, großer Gegner passt unter die Grenze |
 | `InputTest` | Krone: drei Stufen, Richtung, Begrenzung, NaN; FrameClock: 30 und 60 Bilder/s ergeben 60 Schritte/s, Lücken gekappt, Neubeginn nach Pause |
 | `SpritesTest` | Raster rechteckig, nur bekannte Farben, Seitenverhältnis passt zur logischen Größe, Größen wie `EnemyType` |
 | `RendererTest` | Punkte, Leben, Schiff am Rand, Pause- und End-Feld ganz im Kreis; Reihenfolge (Punkte unter den Gegnern, Schiff darüber); Blitz und Lebensbalken; Punktetext nur bei Änderung neu; Ergebnis am Ende; Blinken bei Unverwundbarkeit |
-| `BalanceReport` | 4 × 200 Partien mit Bot-Spielern, Spieldauer und Punkte, Ursachen der Lebensverluste; Ziele siehe [spiel.md](spiel.md#balancing); großer Gegner allein immer zu schaffen |
+| `BalanceReport` | 4 × 200 Partien mit Bot-Spielern, Spieldauer und Punkte, Ursachen der Lebensverluste; je Gegnermenge 200 Partien „wie Mensch“; Ziele siehe [spiel.md](spiel.md#balancing); großer Gegner allein immer zu schaffen |
 | `PreviewReport` | Vorschaubilder (siehe unten) |
 
 ## Vorschaubilder
@@ -73,7 +74,7 @@ MIN_JAR=/pfad/zu/android-30/android.jar ./tools/build-apk.sh    # Ergebnis: buil
 - `ANDROID_RES_JAR`: Plattform für aapt2, API 34. Das aapt2 aus Ubuntu (Android 14) kann die Ressourcentabelle von
   API 35 nicht lesen; die Ressourcen nutzen nichts Neueres.
 - `MIN_JAR` (optional): zusätzlich gegen minSdk 30 kompilieren, als Ersatz für die Lint-Prüfung „NewApi“. Jede
-  Meldung ist ein Aufruf oberhalb von minSdk und muss hinter einer Versionsabfrage liegen. Stand 1.0: nur
+  Meldung ist ein Aufruf oberhalb von minSdk und muss hinter einer Versionsabfrage liegen. Stand 1.1: nur
   `View.setRequestedFrameRate` in `GameActivity` (API 35), abgesichert.
 - Ohne Android-SDK: die `android.jar` gibt es z. B. im GitHub-Repository `Sable/android-platforms`
   (Ordner `android-30`, `android-34`, `android-35`).
@@ -94,4 +95,4 @@ und außerhalb des Repositorys aufbewahren.
 
 ## Version
 
-`versionCode`/`versionName` in `wear/build.gradle.kts` (1 / 1.0). `tools/build-apk.sh` liest sie von dort.
+`versionCode`/`versionName` in `wear/build.gradle.kts` (2 / 1.1). `tools/build-apk.sh` liest sie von dort.

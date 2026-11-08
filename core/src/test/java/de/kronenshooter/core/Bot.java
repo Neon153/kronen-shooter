@@ -78,7 +78,8 @@ final class Bot {
         }
         int missing = e.hp[j] - pending;
         if (missing <= 0) return Double.NaN;
-        double reach = Math.max(0, SHIP_Y - SHIP_H / 2 - (e.y[j] + t.h / 2)) / e.vy[j];
+        // Zeit, bis die Unterkante die Oberkante des Schiffs erreicht (mit Beschleunigung im Flug)
+        double reach = Game.flightTime(e.vy[j], e.y[j], SHIP_Y - SHIP_H / 2 - t.h / 2);
         double key = reach - missing / FIRE_RATE - Math.max(0, SHIP_Y - e.y[j]) / BULLET_SPEED;
         double travel = Math.abs(e.x[j] - g.shipX) / speed;
         return key - travel > -0.3 ? key : Double.NaN;

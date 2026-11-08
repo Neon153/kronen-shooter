@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-08 – 1.1
+
+- **Gegnermenge** im Menü: wenig, mittel, viel, sehr viel (Faktor 0,6 / 1,0 / 1,5 / 2,2 auf die Rate der Wellen
+  und die Obergrenze der Trefferpunkte). Rekord je Stufe; der bisherige Rekord gilt als „mittel“.
+- **Beschleunigung im Flug:** Gegner werden schneller, je weiter unten sie sind (am Schiff ×1,48, unten ×1,6).
+  Grundtempi um 18 % gesenkt, die Zeit bis zum Schiff bleibt gleich. Der Bot berücksichtigt die Beschleunigung.
+- **Zurück-Wischen** funktioniert jetzt auch mitten im Spiel (1.0 hatte es dort gesperrt). Die Partie endet, der
+  Rekord bleibt.
+- Neuer Test `FlightTest`, `BalanceReport` misst zusätzlich alle vier Gegnermengen. 65 Tests.
+
 ## 2026-11-08 – 1.0
 
 - Erste Version der Uhr-App für Wear OS 3 und neuer (gebaut für die Pixel Watch 5), läuft ohne Handy.

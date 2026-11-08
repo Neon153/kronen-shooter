@@ -8,24 +8,26 @@ import android.view.WindowManager;
 
 /**
  * Das Spiel im Vollbild. Lebenszyklus: onPause (Handgelenk runter, Benachrichtigung, Schnelleinstellungen, Druck auf
- * die Krone) pausiert sofort und stoppt den Takt; nach onResume steht „Pause – Tippen: weiter“ da. Der Bildschirm
- * bleibt nur wach, solange der Takt läuft (Stillstehen ist im Spiel normal, ohne das ginge der Bildschirm aus).
- * Rekord: gespeichert beim Ende und in onPause, falls überboten; „Neuer Rekord“ bezieht sich auf den Stand beim
- * Start der Partie.
+ * die Krone) pausiert sofort und stoppt den Takt; nach onResume steht „Pause – Tippen: weiter“ da. Wischen nach
+ * rechts (Zurück) schließt das Spiel jederzeit. Der Bildschirm bleibt nur wach, solange der Takt läuft (Stillstehen
+ * ist im Spiel normal, ohne das ginge der Bildschirm aus).
+ * Rekord je Gegnermenge: gespeichert beim Ende und in onPause, falls überboten (also auch beim Zurück-Wischen);
+ * „Neuer Rekord“ bezieht sich auf den Stand beim Start der Partie.
  */
 public final class GameActivity extends WearActivity implements GameView.Listener {
     private GameView view;
     private Store store;
     private Vibrator vibrator;
-    private int bestAtStart;
+    private int spawnLevel, bestAtStart;
 
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         store = new Store(this);
-        bestAtStart = store.best();
+        spawnLevel = store.spawnLevel();
+        bestAtStart = store.best(spawnLevel);
         int fps = store.fps();
-        view = new GameView(this, getResources().getConfiguration().isScreenRound());
+        view = new GameView(this, getResources().getConfiguration().isScreenRound(), spawnLevel);
         view.setCrown(store.crown());
         view.setFps(fps);
         view.setListener(this);
@@ -58,7 +60,7 @@ public final class GameActivity extends WearActivity implements GameView.Listene
     protected void onPause() {
         view.onPaused();
         int score = view.game().score();
-        if (score > store.best()) store.saveBest(score);
+        if (score > store.best(spawnLevel)) store.saveBest(spawnLevel, score);
         super.onPause();
     }
 
@@ -81,9 +83,9 @@ public final class GameActivity extends WearActivity implements GameView.Listene
 
     @Override
     public void onGameOver(int score) {
-        int best = store.best();
+        int best = store.best(spawnLevel);
         if (score > best) {
-            store.saveBest(score);
+            store.saveBest(spawnLevel, score);
             best = score;
         }
         view.showResult(best, score > bestAtStart);
@@ -92,7 +94,7 @@ public final class GameActivity extends WearActivity implements GameView.Listene
 
     @Override
     public void onNewGame() {
-        bestAtStart = store.best();
+        bestAtStart = store.best(spawnLevel);
     }
 
     private void buzz(int effect) {

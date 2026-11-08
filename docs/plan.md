@@ -27,7 +27,7 @@ Debugging per WLAN aus Android Studio.
 | „Hinausfliegen“ auf einem runden Display | zählt, sobald der Gegner ganz außerhalb des sichtbaren Kreises ist, nicht erst bei y = 1000 |
 | Stillstehen ist im Spiel normal, der Bildschirm ginge aus | `FLAG_KEEP_SCREEN_ON` nur, solange gespielt wird |
 | Handgelenk runter, Benachrichtigung, Krone drücken | sofort Pause, weiter nur durch Tippen |
-| Versehentliches Wischen beendet die Partie | Wischen schließt nur in Pause und am Ende |
+| Versehentliches Wischen beendet die Partie | 1.0: Wischen schließt nur in Pause und am Ende. Seit 1.1 aufgehoben, Zurück muss immer funktionieren (siehe unten) |
 | Urheberrecht | eigene Sprites, nicht „Space Invaders“ als Name |
 
 ## Entscheidungen
@@ -52,9 +52,18 @@ Debugging per WLAN aus Android Studio.
 | Ein Zufallsgenerator | zwei: Gegner (`rnd`) und Optik (`fx`) | Funken veränderten sonst die Gegnerfolge |
 | Messanzeige für die Krone im Spiel | eigene Seite „Krone messen“ im Menü | stört das Spiel nicht, bleibt für spätere Uhren nutzbar |
 
+## Version 1.1: Wünsche nach dem ersten Test
+
+| Wunsch | Umsetzung |
+|---|---|
+| Gegnermenge einstellbar: wenig, mittel, viel, sehr viel | Faktor 0,6 / 1,0 / 1,5 / 2,2 auf die Rate der Wellen und die Obergrenze der Trefferpunkte. Größe der Wellen, Mischung und Tempo bleiben. **Rekord je Stufe**, weil Partien mit mehr Gegnern kürzer sind und anders punkten; der Rekord aus 1.0 gilt als „mittel“ |
+| Gegner sollen über die Zeit im Flug schneller werden | Verstanden als: jeder Gegner beschleunigt auf dem Weg nach unten (oben Grundtempo, am Schiff ×1,48, unten ×1,6). Die Grundtempi sind um 18 % gesenkt, damit die Zeit bis zum Schiff gleich bleibt. Dass alle Gegner mit der Spielzeit schneller werden, gab es schon seit 1.0 (×1,0 → ×1,6 in 5 min, danach +0,1 je Minute) und bleibt |
+| Wischen vom linken Rand nach rechts ist Zurück und muss auch im Spiel funktionieren | Sperre aus 1.0 entfernt. Zurück im Spiel beendet die Partie, der Rekord wird in `onPause` gesichert |
+
 ## Offen (an der Uhr)
 
 1. Krone messen und `CrownInput.GAIN` setzen ([uhr.md](uhr.md#krone-einstellen)).
 2. Bildrate und Akku bei 30 und 60 Bildern/s messen, Standard festlegen ([uhr.md](uhr.md#energie)).
 3. Spielgefühl: Dauer einer Partie, Fairness am Anfang, Lesbarkeit der Punkte.
-4. Prüfen, dass Wischen während des Spiels nichts schließt.
+4. Prüfen, dass Zurück-Wischen mitten im Spiel zuverlässig ins Menü führt und nicht versehentlich ausgelöst wird.
+5. Spielgefühl der Beschleunigung und der vier Gegnermengen.

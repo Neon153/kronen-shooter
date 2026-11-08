@@ -50,6 +50,20 @@ public final class Tuning {
     /** Kleine Gegner pendeln ab ZIGZAG_FROM_S seitlich, bis zu diesem Anteil am Ende der Steigerung. */
     public static final double ZIGZAG_FROM_S = 60, ZIGZAG_MAX = 0.5, ZIGZAG_AMP = 40, ZIGZAG_OMEGA = 2.4;
 
+    /*
+     * Gegnermenge (Einstellung im Menü: wenig, mittel, viel, sehr viel). Faktor auf die Rate der Wellen und auf die
+     * Obergrenze der Trefferpunkte; ohne die zweite würde die Grenze eine höhere Menge wieder abschneiden.
+     */
+    public static final double[] SPAWN_LEVELS = {0.6, 1.0, 1.5, 2.2};
+    public static final int SPAWN_DEFAULT = 1;
+
+    /*
+     * Beschleunigung im Flug: Tempo = Grundtempo × (1 + FLIGHT_ACCEL × y / 1000), y auf [0, 1000] begrenzt. Oben
+     * fliegen die Gegner mit dem Grundtempo, auf Höhe des Schiffs 1,48-mal, unten 1,6-mal so schnell. Die
+     * Grundtempi in EnemyType sind so gesenkt, dass die Flugzeit bis zum Schiff etwa gleich bleibt wie ohne.
+     */
+    public static final double FLIGHT_ACCEL = 0.6;
+
     /* Rückmeldung */
     public static final double FLASH_S = 0.06;
 }

@@ -7,8 +7,7 @@
         <item name="android:colorAccent">@color/accent</item>
         <item name="android:textColorPrimary">@color/text</item>
         <item name="android:textColorSecondary">@color/muted</item>
-        <!-- Wischen nach rechts schließt die Ansicht (Standard auf Wear OS). Im Spiel nur in Pause und am Ende,
-             siehe GameView.canScrollHorizontally -->
+        <!-- Wischen nach rechts schließt die Ansicht (Zurück, Standard auf Wear OS), auch mitten im Spiel -->
         <item name="android:windowSwipeToDismiss">true</item>
     </style>
 </resources>
